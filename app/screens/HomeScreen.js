@@ -13,6 +13,7 @@ import {
 
 import Ionicons from '@expo/vector-icons/Ionicons';
 
+import { onSnapshot } from "firebase/firestore";
 import {
   deleteQuiz,
   getDataByUidAndQuizId,
@@ -20,6 +21,7 @@ import {
   getUserById
 } from '../utils/database';
 import { auth } from '../utils/firebase';
+
 
 import { COLORS, IMAGES } from '../constants/theme';
 
@@ -31,11 +33,14 @@ const HomeScreen = () => {
   const [refreshing, setRefreshing] = useState(false);
 
   const getUserInfo = async () => {
-    const userInfo = await getUserById(auth.currentUser?.uid);
-    userInfo.onSnapshot(data => {
-      const userData = data.data();
-      setUser(userData)
-    })
+  const userRef = getUserById(auth.currentUser?.uid); // это doc(db, "Users", uid)
+
+  // подписка на realtime
+  return onSnapshot(userRef, (snapshot) => {
+    if (snapshot.exists()) {
+      setUser(snapshot.data());
+    }
+  });
   }
 
   const getAllQuizzes = async () => {
@@ -45,7 +50,7 @@ const HomeScreen = () => {
 
     // Transform quiz data
     let tempQuizzes = [];
-    for (quiz of quizzes.docs) {
+    for (const quiz of quizzes.docs) {
       const userQuizzes = await getDataByUidAndQuizId(auth.currentUser?.uid, quiz.id);
       const userInfo = userQuizzes.data()
       await tempQuizzes.push({ id: quiz.id, userInfo, ...quiz.data() });

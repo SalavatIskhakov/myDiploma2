@@ -1,14 +1,14 @@
-import React, { useState, useEffect } from 'react';
+import { onSnapshot } from "firebase/firestore";
+import React, { useEffect, useState } from 'react';
 import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
   Image,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
 } from 'react-native';
-
-import { auth } from '../utils/firebase'
-import { getUsers, getDataByUid } from '../utils/database';
+import { getDataByUid, getUsers } from '../utils/database';
+import { auth } from '../utils/firebase';
 
 import { COLORS, IMAGES } from '../constants/theme';
 
@@ -31,54 +31,45 @@ const DetailsScreen = () => {
   const [totalCount, setTotalCount] = useState(0);
 
   const getAllDataOfUid = async () => {
-    const quizzes = await getDataByUid(auth.currentUser?.uid);
+   const quizzesRef = getDataByUid(auth.currentUser?.uid);
 
-    quizzes.onSnapshot(async docs => {
-      console.log('change Statistics');
-      const quizzesDocs = docs.docs;
+    onSnapshot(quizzesRef, (docs) => {
+      console.log("change Statistics");
+
       let quiz = 0;
       let correct = 0;
       let incorrect = 0;
       let total = 0;
-  
-      await quizzesDocs.forEach(async res => {
-        let currentQuiz = res.data();
+
+      docs.forEach((doc) => {
+        const currentQuiz = doc.data();
         quiz++;
         correct += currentQuiz.correctCount;
         incorrect += currentQuiz.incorrectCount;
         total += currentQuiz.total;
       });
-  
+
       setQuizCount(quiz);
       setCorrectCount(correct);
       setIncorrectCount(incorrect);
       setTotalCount(total);
-    })
+    });
   }
 
   const getAllUsers = async () => {
-    const users = await getUsers();
+    const usersRef = getUsers();
+    
+    onSnapshot(usersRef, (docs) => {
+    console.log("change TOP10");
 
-    users.onSnapshot(async docs => {
-      const usersDocs = docs.docs;
-      console.log('change TOP10');
+    const tempUsers = docs.docs.map((user) => user.data());
 
-      let tempUsers = [];
-
-      for (const user of usersDocs) {
-        await tempUsers.push(user.data());
-      }
-
-      setAllUsers(
-        tempUsers
-          .filter(user => user?.role != 'admin')
-          .sort((a, b) => {
-            if (a.xp > b.xp) return -1;
-            if (a.xp < b.xp) return 1;
-            return 0;
-          })
-      )
-    })
+    setAllUsers(
+      tempUsers
+        .filter((user) => user?.role !== "admin")
+        .sort((a, b) => Number(b.xp) - Number(a.xp))
+    );
+  });
   }
 
   useEffect(() => {

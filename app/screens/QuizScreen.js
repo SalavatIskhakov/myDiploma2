@@ -1,52 +1,54 @@
-import React, { useState, useEffect } from 'react';
+import { onSnapshot } from "firebase/firestore";
+import React, { useEffect, useState } from 'react';
 import {
-  View,
-  Text,
-  TouchableOpacity,
+  Image,
   ScrollView,
   StyleSheet,
-  Image
+  Text,
+  TouchableOpacity,
+  View
 } from 'react-native';
 
-import Img from './components/Img';
 import FormButton from './components/FormButton';
+import Img from './components/Img';
 
 import { getQuestionsByQuizId } from '../utils/database';
 
-import { COLORS, SIZES, IMAGES } from '../constants/theme';
+import { COLORS, IMAGES, SIZES } from '../constants/theme';
 
 const QuizScreen = ({ navigation, route }) => {
   const { title, id, description, imageUrl, user } = route.params;
   const [points, setPoints] = useState([]);
 
   const getQuizDetails = async () => {
-    // Get Questions for current quiz
-    const points = await getQuestionsByQuizId(id);
+    const pointsRef = getQuestionsByQuizId(id);  // collection(db, "Quizzes", id, "QNA")
 
-    points.onSnapshot(async docs => {
-      console.log('change QuizScreen');
-      const pointsDocs = docs.docs;
+    onSnapshot(pointsRef, (docs) => {
+      console.log("change QuizScreen");
       let tempQuestions = [];
 
-      pointsDocs.forEach(async res => {
-        let question = res.data();
-        question.id = res.id;
-        // img question
+      docs.forEach((res) => {
+        const question = {
+          id: res.id,
+          ...res.data(),
+        };
+      
+        // image
         if (!question.imageUrl) {
           question.imageUrl = IMAGES.noImage;
         }
-
-        // Create Single array of all options and shuffle it
+      
+        // shuffle options
         question.allOptions = [
           ...question.incorrect_answers,
           question.correct_answer,
         ];
-
-        await tempQuestions.push(question);
+      
+        tempQuestions.push(question);
       });
-
-      setPoints([...tempQuestions]);
-    })
+     
+      setPoints(tempQuestions);
+    });
   };
 
   useEffect(() => {

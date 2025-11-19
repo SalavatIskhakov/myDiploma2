@@ -1,34 +1,36 @@
-import React, { useEffect, useState } from 'react'
+import { useNavigation } from '@react-navigation/core';
+import { onSnapshot } from "firebase/firestore";
+import React, { useEffect, useState } from 'react';
 import {
-  StyleSheet,
+  Image,
   ScrollView,
+  StyleSheet,
   Text,
-  View,
-  Image
-} from 'react-native'
-import { useNavigation } from '@react-navigation/core'
+  View
+} from 'react-native';
 
 import Option from './components/Option';
 
-import { auth } from '../utils/firebase'
 import { getUserById } from '../utils/database';
+import { auth } from '../utils/firebase';
 
-import { COLORS, IMAGES, SIZES } from '../constants/theme'
+import { COLORS, IMAGES, SIZES } from '../constants/theme';
 
 const SettingsScreen = () => {
   const [user, setUser] = useState({})
-
   const navigation = useNavigation()
-
   const getUserInfo = async () => {
-    console.log('change SettingsScreen')
-    const email = auth.currentUser?.email;
-    const userInfo = await getUserById(auth.currentUser?.uid);
-    userInfo.onSnapshot(data => {
-      const userData = data.data();
-      userData['email'] = email;
-      setUser(userData)
-    })
+  console.log("change SettingsScreen");
+  const email = auth.currentUser?.email;
+  const userRef = getUserById(auth.currentUser?.uid); // это doc(db, "Users", uid)
+  onSnapshot(userRef, (snapshot) => {
+    if (!snapshot.exists()) return;
+
+    const userData = snapshot.data();
+    const merged = { ...userData, email };
+
+    setUser(merged);
+  });
   }
 
   const handleSignOut = () => {

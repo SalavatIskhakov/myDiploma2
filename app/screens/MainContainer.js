@@ -1,16 +1,17 @@
-import React, { useEffect, useState } from 'react'
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import Ionicons from '@expo/vector-icons/Ionicons';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import React, { useEffect, useState } from 'react';
 
 import { COLORS } from '../constants/theme';
 
-import { auth } from '../utils/firebase'
 import { getUserById } from '../utils/database';
+import { auth } from '../utils/firebase';
 
-import HomeScreen from './HomeScreen';
-import DetailsScreen from './DetailsScreen';
-import SettingsScreen from './SettingsScreen';
+import { onSnapshot } from "firebase/firestore";
 import CreateQuizScreen from './CreateQuizScreen';
+import DetailsScreen from './DetailsScreen';
+import HomeScreen from './HomeScreen';
+import SettingsScreen from './SettingsScreen';
 
 const Tab = createBottomTabNavigator();
 
@@ -18,12 +19,15 @@ const MainContainer = () => {
   const [user, setUser] = useState({})
 
   const getUserInfo = async () => {
-    console.log('change MainContainer')
-    const userInfo = await getUserById(auth.currentUser?.uid);
-    userInfo.onSnapshot(data => {
-      const userData = data.data();
-      setUser(userData)
-    })
+  console.log("change MainContainer");
+  const userRef = getUserById(auth.currentUser?.uid); // это doc(db, "Users", uid)
+
+  // подписка на realtime
+  return onSnapshot(userRef, (snapshot) => {
+    if (snapshot.exists()) {
+      setUser(snapshot.data());
+    }
+  });
   }
 
   useEffect(() => {
@@ -32,7 +36,6 @@ const MainContainer = () => {
 
   return (
     <Tab.Navigator
-      independent={true}>
       initialRouteName={'Home'}
       screenOptions={({ route }) => ({
         tabBarIcon: ({ focused, color, size }) => {

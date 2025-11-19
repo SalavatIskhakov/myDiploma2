@@ -1,16 +1,19 @@
-import React, { useEffect, useState } from 'react'
+import { useNavigation } from '@react-navigation/core';
+import React, { useEffect, useState } from 'react';
 import {
   StyleSheet, Text,
   TextInput,
   ToastAndroid,
   TouchableOpacity,
   View,
-} from 'react-native'
-import { useNavigation } from '@react-navigation/core'
+} from 'react-native';
 
-import { auth } from '../utils/firebase'
+import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
 
-import { COLORS } from '../constants/theme'
+
+import { COLORS } from '../constants/theme';
+
+const auth = getAuth();
 
 const LoginScreen = () => {
   const [email, setEmail] = useState('')
@@ -30,8 +33,7 @@ const LoginScreen = () => {
   }, [])
 
   const handleLogin = () => {
-    auth
-      .signInWithEmailAndPassword(email, password)
+    signInWithEmailAndPassword(auth, email, password)
       .then(userCredentials => {
         const user = userCredentials.user;
         console.log('Logged in with: ', user.email);

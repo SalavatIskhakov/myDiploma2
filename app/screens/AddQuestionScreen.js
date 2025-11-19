@@ -1,18 +1,18 @@
+import { launchImageLibraryAsync, MediaTypeOptions } from 'expo-image-picker';
 import React, { useState } from 'react';
 import {
-  View,
-  Text,
+  Image,
   KeyboardAvoidingView,
   ScrollView,
   StyleSheet,
+  Text,
   ToastAndroid,
   TouchableOpacity,
-  Image,
+  View,
 } from 'react-native';
-import { launchImageLibraryAsync, MediaTypeOptions } from 'expo-image-picker';
 
-import FormInput from './components/FormInput';
 import FormButton from './components/FormButton';
+import FormInput from './components/FormInput';
 
 import { createQuestion } from '../utils/database';
 import { storage } from '../utils/firebase';
@@ -214,7 +214,7 @@ const AddQuestionScreen = ({ navigation, route }) => {
             isPrimary={false}
             handleOnPress={() => {
               setCurrentQuizId('');
-              navigation.navigate('Home');
+              navigation.popToTop()
             }}
             style={{ marginVertical: 20 }}
           />

@@ -1,18 +1,31 @@
-import { firestore } from './firebase';
+import {
+  getFirestore,
+  collection,
+  doc,
+  setDoc,
+  updateDoc,
+  getDoc,
+  getDocs,
+  deleteDoc
+} from "firebase/firestore";
+
+import { app } from "./firebase";
+
+const db = getFirestore(app);
 
 //* Users
 export const createUser = (uid, name, imageUrl) => {
-  return firestore.collection('Users').doc(uid).set({
+  return setDoc(doc(db, "Users", uid), {
     uid,
     name,
     imageUrl,
-    role: 'user',
-    xp: '0',
+    role: "user",
+    xp: "0",
   });
 };
 
 export const updateUser = (uid, name, imageUrl) => {
-  return firestore.collection('Users').doc(uid).update({
+  return updateDoc(doc(db, "Users", uid), {
     uid,
     name,
     imageUrl,
@@ -20,52 +33,39 @@ export const updateUser = (uid, name, imageUrl) => {
 };
 
 export const updateXp = (uid, xp) => {
-  return firestore.collection('Users').doc(uid).update({
-    xp
+  return updateDoc(doc(db, "Users", uid), {
+    xp,
   });
 };
 
-// Create new question for current quiz
+// Create new quiz record for user
 export const addQuizForUser = (uid, currentQuizId, data) => {
-  return firestore
-    .collection('Users')
-    .doc(uid)
-    .collection('Quizzes')
-    .doc(currentQuizId)
-    .set(data);
+  return setDoc(doc(db, "Users", uid, "Quizzes", currentQuizId), data);
 };
 
-// Get All Users
+// Get All Users (returns Query)
 export const getUsers = () => {
-  return firestore.collection('Users');
+  return collection(db, "Users");
 };
 
-// Get Users Details by id
-export const getUserById = uid => {
-  return firestore.collection('Users').doc(uid);
+// Get User Details by id (returns DocumentReference)
+export const getUserById = (uid) => {
+  return doc(db, "Users", uid);
 };
 
-// Get data of user by uid
-export const getDataByUid = uid => {
-  return firestore
-    .collection('Users')
-    .doc(uid)
-    .collection('Quizzes')
+// Get quizzes collection of user
+export const getDataByUid = (uid) => {
+  return collection(db, "Users", uid, "Quizzes");
 };
 
-// Get data of user by uid and quizId
-export const getDataByUidAndQuizId = (uid, currentQuizId) => {
-  return firestore
-    .collection('Users')
-    .doc(uid)
-    .collection('Quizzes')
-    .doc(currentQuizId)
-    .get();
+// Get quiz data for specific user
+export const getDataByUidAndQuizId = async (uid, currentQuizId) => {
+  return await getDoc(doc(db, "Users", uid, "Quizzes", currentQuizId));
 };
 
 //* Quizzes
 export const createQuiz = (currentQuizId, title, description, imageUrl) => {
-  return firestore.collection('Quizzes').doc(currentQuizId).set({
+  return setDoc(doc(db, "Quizzes", currentQuizId), {
     title,
     description,
     imageUrl,
@@ -73,46 +73,33 @@ export const createQuiz = (currentQuizId, title, description, imageUrl) => {
 };
 
 export const deleteQuiz = (currentQuizId) => {
-  return firestore.collection('Quizzes').doc(currentQuizId).delete();
+  return deleteDoc(doc(db, "Quizzes", currentQuizId));
 };
 
-// Create new question for current quiz
+// Create question
 export const createQuestion = (currentQuizId, currentQuestionId, question) => {
-  return firestore
-    .collection('Quizzes')
-    .doc(currentQuizId)
-    .collection('QNA')
-    .doc(currentQuestionId)
-    .set(question);
+  return setDoc(doc(db, "Quizzes", currentQuizId, "QNA", currentQuestionId), question);
 };
 
 export const deleteQuestion = (currentQuizId, currentQuestionId) => {
-  return firestore
-    .collection('Quizzes')
-    .doc(currentQuizId)
-    .collection('QNA')
-    .doc(currentQuestionId)
-    .delete();
+  return deleteDoc(doc(db, "Quizzes", currentQuizId, "QNA", currentQuestionId));
 };
 
-// Get All Quizzes
+// Get All Quizzes (returns Promise)
 export const getQuizzes = () => {
-  return firestore.collection('Quizzes').get();
+  return getDocs(collection(db, "Quizzes"));
 };
 
-// Get Quiz Details by id
-export const getQuizById = currentQuizId => {
-  return firestore.collection('Quizzes').doc(currentQuizId).get();
-  };
+// Get quiz details by id
+export const getQuizById = (currentQuizId) => {
+  return getDoc(doc(db, "Quizzes", currentQuizId));
+};
 
-export const getQuizById2 = currentQuizId => {
-  return firestore.collection('Quizzes').doc('123456');
-  };
+export const getQuizById2 = (currentQuizId) => {
+  return doc(db, "Quizzes", "123456");
+};
 
-// Get Questions by currentQuizId
-export const getQuestionsByQuizId = currentQuizId => {
-  return firestore
-    .collection('Quizzes')
-    .doc(currentQuizId)
-    .collection('QNA')
+// Get Questions by quizId (returns Query)
+export const getQuestionsByQuizId = (currentQuizId) => {
+  return collection(db, "Quizzes", currentQuizId, "QNA");
 };
