@@ -25,6 +25,6 @@ export const SIZES = {
 };
 
 export const IMAGES = {
-  noAvatar: 'https://avatars.mds.yandex.net/i?id=151466b6e2052cdeed45a0ad67beebec-5869219-images-thumbs&ref=rim&n=33&w=225&h=225',
-  noImage: 'https://img3.stcrm.it/images/22898928/2500x/annunciomymoto.jpeg',
+  noAvatar: 'https://avatars.mds.yandex.net/get-yapic/26057/tXrD9gTYvqlx14J8K0wwHsyJvUY-1/orig',
+  noImage: 'https://api.chief18.dev.ceratex.ru/storage/no_photo.png',
 }

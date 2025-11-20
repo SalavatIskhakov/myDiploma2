@@ -1,16 +1,16 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react';
 import {
   StyleSheet,
   ToastAndroid,
   View,
-} from 'react-native'
+} from 'react-native';
 
-import FormInput from './components/FormInput';
+import { updatePassword } from "firebase/auth";
+import { auth } from '../utils/firebase';
 import FormButton from './components/FormButton';
+import FormInput from './components/FormInput';
 
-import { auth } from '../utils/firebase'
-
-import { COLORS } from '../constants/theme'
+import { COLORS } from '../constants/theme';
 
 const ChangeDataScreen = ({ navigation }) => {
   const [user, setUser] = useState(auth.currentUser);
@@ -18,28 +18,27 @@ const ChangeDataScreen = ({ navigation }) => {
   const [confirmPassword, setConfirmPassword] = useState('')
 
   const update = () => {
-    if (
-      newPassword == '' ||
-      confirmPassword == ''
-    ) {
+    if (newPassword === '' || confirmPassword === '') {
       ToastAndroid.show('Ошибка ввода', ToastAndroid.SHORT);
       return;
     }
-    if (newPassword != confirmPassword) {
+
+    if (newPassword !== confirmPassword) {
       ToastAndroid.show('Пароли не совпадают', ToastAndroid.SHORT);
       return;
     }
 
-    user
-      .updatePassword(newPassword)
+    const user = auth.currentUser;
+
+    updatePassword(user, newPassword)
       .then(() => {
         ToastAndroid.show('Успешно', ToastAndroid.SHORT);
-        navigation.goBack()
+        navigation.goBack();
       })
       .catch(error => {
-        console.log(error.message)
-        ToastAndroid.show(error.message, ToastAndroid.SHORT)
-      })
+        console.log(error.message);
+        ToastAndroid.show(error.message, ToastAndroid.SHORT);
+    });
   }
 
   const clear = () => {

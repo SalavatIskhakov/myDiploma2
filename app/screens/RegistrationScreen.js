@@ -1,20 +1,21 @@
-import React, { useEffect, useState } from 'react'
+import { useNavigation } from '@react-navigation/core';
+import { launchImageLibraryAsync, MediaTypeOptions } from 'expo-image-picker';
+import { createUserWithEmailAndPassword } from "firebase/auth";
+import { getDownloadURL, getStorage, ref, uploadBytes } from "firebase/storage";
+import React, { useEffect, useState } from 'react';
 import {
+  Image,
   StyleSheet,
   Text,
   TextInput,
   ToastAndroid,
   TouchableOpacity,
   View,
-  Image,
-} from 'react-native'
-import { useNavigation } from '@react-navigation/core'
-import { launchImageLibraryAsync, MediaTypeOptions } from 'expo-image-picker';
+} from 'react-native';
+import { createUser } from '../utils/database';
+import { auth } from '../utils/firebase';
 
-import { auth, storage } from '../utils/firebase'
-import { createUser } from '../utils/database'
-
-import { COLORS, IMAGES } from '../constants/theme'
+import { COLORS, IMAGES } from '../constants/theme';
 
 const RegistrationScreen = () => {
   const [imageUri, setImageUri] = useState('')
@@ -34,36 +35,36 @@ const RegistrationScreen = () => {
     return unsubscribe
   }, [])
 
-  const handleSingUp = () => {
-    if (name == '') {
-      ToastAndroid.show('Ошибка ввода', ToastAndroid.SHORT);
+  const handleSingUp = async () => {
+    if (name === "") {
+      ToastAndroid.show("Ошибка ввода", ToastAndroid.SHORT);
       return;
     }
-    auth
-      .createUserWithEmailAndPassword(email, password)
-      .then(async (userCredentials) => {
-        const user = userCredentials.user;
 
-        let imageUrl = '';
+    try {
+      const userCredentials = await createUserWithEmailAndPassword(auth, email, password);
+      const user = userCredentials.user;
 
-        if (imageUri != '') {
-          const responce = await fetch(imageUri);
-          const blob = await responce.blob();
+      let imageUrl = "";
 
-          const reference = storage.ref().child(
-            `/images/users/${user.uid}`,
-          );
-          await reference.put(blob).then(() => {
-            console.log('Изображение добавлено');
-          })
-          imageUrl = await reference.getDownloadURL();
-        }
+      if (imageUri !== "") {
+        const response = await fetch(imageUri);
+        const blob = await response.blob();
 
-        await createUser(user.uid, name, imageUrl)
-        console.log('Registered with:', user.email);
-        console.log('uid:', user.uid);
-      })
-      .catch(error => ToastAndroid.show(error.message, ToastAndroid.SHORT))
+        const storageRef = ref(getStorage(), `images/users/${user.uid}`);
+        await uploadBytes(storageRef, blob);
+        console.log("Изображение добавлено");
+
+        imageUrl = await getDownloadURL(storageRef);
+      }
+
+      await createUser(user.uid, name, imageUrl);
+
+      console.log("Registered with:", user.email);
+      console.log("uid:", user.uid);
+    } catch (error) {
+      ToastAndroid.show(error.message, ToastAndroid.SHORT);
+}
   }
 
   const selectImage = async () => {
@@ -75,8 +76,8 @@ const RegistrationScreen = () => {
         quality: 1,
       }
     );
-    if (!result.cancelled) {
-      setImageUri(result.uri);
+    if (!result.cancelled && result.assets?.length) {
+      setImageUri(result.assets[0].uri);
     }
   };
 

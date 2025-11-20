@@ -9,7 +9,7 @@ import FormButton from './components/FormButton';
 import FormInput from './components/FormInput';
 
 import { auth } from '../utils/firebase';
-
+import { updateEmail } from "firebase/auth";
 import { COLORS } from '../constants/theme';
 
 const ChangeDataScreen = ({ navigation }) => {
@@ -17,22 +17,22 @@ const ChangeDataScreen = ({ navigation }) => {
   const [email, setEmail] = useState(user.email)
 
   const update = () => {
-    if (email == '') {
-      ToastAndroid.show('Ошибка ввода', ToastAndroid.SHORT);
+    if (email === "") {
+      ToastAndroid.show("Ошибка ввода", ToastAndroid.SHORT);
       return;
     }
-    if (email == user.email) { return; }
 
-    user
-      .updateEmail(email)
+    if (email === auth.currentUser.email) return;
+
+    updateEmail(auth.currentUser, email)
       .then(() => {
-        ToastAndroid.show('Успешно', ToastAndroid.SHORT);
-        navigation.goBack()
+        ToastAndroid.show("Успешно", ToastAndroid.SHORT);
+        navigation.goBack();
       })
       .catch(error => {
-        console.log(error.message)
-        ToastAndroid.show(error.message, ToastAndroid.SHORT)
-      })
+        console.log(error.message);
+        ToastAndroid.show(error.message, ToastAndroid.SHORT);
+      });
   }
 
   const clear = () => {

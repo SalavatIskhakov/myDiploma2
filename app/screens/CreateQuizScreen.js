@@ -1,21 +1,21 @@
+import { launchImageLibraryAsync, MediaTypeOptions } from 'expo-image-picker';
 import React, { useState } from 'react';
 import {
-  Text,
-  StyleSheet,
-  ScrollView,
-  View,
-  TouchableOpacity,
-  ToastAndroid,
   Image,
+  ScrollView,
+  StyleSheet,
+  Text,
+  ToastAndroid,
+  TouchableOpacity,
+  View,
 } from 'react-native';
-import { launchImageLibraryAsync, MediaTypeOptions } from 'expo-image-picker';
 
-import FormInput from './components/FormInput';
 import FormButton from './components/FormButton';
+import FormInput from './components/FormInput';
 
-import { createQuiz, createQuestion } from '../utils/database';
-import { storage } from '../utils/firebase';
+import { createQuestion, createQuiz } from '../utils/database';
 
+import { getDownloadURL, getStorage, ref, uploadBytes } from "firebase/storage";
 import { COLORS } from '../constants/theme';
 
 const CreateQuizScreen = ({ navigation }) => {
@@ -23,7 +23,8 @@ const CreateQuizScreen = ({ navigation }) => {
   const [description, setDescription] = useState('');
   const [imageUri, setImageUri] = useState('');
   const [isDisabled, setIsDisabled] = useState(false);
-
+  const storage = getStorage();
+  
   const handleQuizSave = async () => {
     if (title == '' || description == '') {
       ToastAndroid.show('Ошибка ввода', ToastAndroid.SHORT);
@@ -39,16 +40,14 @@ const CreateQuizScreen = ({ navigation }) => {
     let imageUrl = '';
 
     if (imageUri != '') {
-      const responce = await fetch(imageUri);
-      const blob = await responce.blob();
+      const response = await fetch(imageUri);
+      const blob = await response.blob();
+      const reference = ref(storage, `images/questions/${currentQuizId}`);
 
-      const reference = storage.ref().child(
-        `/images/questions/${currentQuizId}`,
-      );
-      await reference.put(blob).then(() => {
-        console.log('Изображение добавлено');
-      })
-      imageUrl = await reference.getDownloadURL();
+      await uploadBytes(reference, blob);
+      console.log("Изображение добавлено");
+
+      imageUrl = await getDownloadURL(reference);
     }
 
     await createQuiz(currentQuizId, title, description, imageUrl);
@@ -76,8 +75,8 @@ const CreateQuizScreen = ({ navigation }) => {
         quality: 1,
       }
     );
-    if (!result.cancelled) {
-      setImageUri(result.uri);
+    if (!result.cancelled && result.assets?.length) {
+      setImageUri(result.assets[0].uri);
     }
   };
 

@@ -90,17 +90,19 @@ const QuizScreen = ({ navigation, route }) => {
             </TouchableOpacity>
             : null
         }
-        <View style={{ alignItems: 'center' }}>
-          <FormButton
-            labelText='Сдать тест'
-            style={styles.btn}
-            handleOnPress={() => {
-              navigation.navigate('PlayQuizScreen', {
-                quizId: id,
-              });
-            }}
-          />
-        </View>
+        {points.length ? (
+          <View style={{ alignItems: 'center' }}>
+            <FormButton
+              labelText='Сдать тест'
+              style={styles.btn}
+              handleOnPress={() => {
+                navigation.navigate('PlayQuizScreen', {
+                  quizId: id,
+                });
+              }}
+            />
+          </View>
+        ): null}
       </View>
     </ScrollView>
   )
@@ -115,6 +117,7 @@ const styles = StyleSheet.create({
     padding: 10,
     alignItems: 'center',
     paddingTop: 0,
+    marginBottom: 25,
   },
   img: {
     width: SIZES.width,

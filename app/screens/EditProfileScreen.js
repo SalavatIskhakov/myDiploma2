@@ -10,8 +10,8 @@ import { launchImageLibraryAsync, MediaTypeOptions } from 'expo-image-picker';
 
 import FormInput from './components/FormInput';
 import FormButton from './components/FormButton';
-
-import { auth, storage } from '../utils/firebase'
+import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { auth } from '../utils/firebase'
 import { updateUser } from '../utils/database';
 
 import { COLORS, IMAGES } from '../constants/theme'
@@ -29,33 +29,34 @@ const EditProfileScreen = ({ route, navigation }) => {
   }
 
   const update = async () => {
-    if (name == '') {
-      ToastAndroid.show('Ошибка ввода', ToastAndroid.SHORT);
+    if (name === "") {
+      ToastAndroid.show("Ошибка ввода", ToastAndroid.SHORT);
       return;
     }
-    if (name == user.name && imageUri == user.imageUrl) { return; }
-    if (isDisabled) { return; }
-    setIsDisabled(true)
 
-    let imageUrl = '';
+    if (name === user.name && imageUri === user.imageUrl) return;
+    if (isDisabled) return;
 
-    if (imageUri != '' && imageUri != user.imageUrl) {
-      const responce = await fetch(imageUri);
-      const blob = await responce.blob();
+    setIsDisabled(true);
 
-      const reference = storage.ref().child(
-        `/images/users/${user.uid}`,
-      );
-      await reference.put(blob).then(() => {
-        console.log('Изображение добавлено');
-      })
-      imageUrl = await reference.getDownloadURL();
+    let imageUrl = user.imageUrl; // по умолчанию текущий URL
+    if (imageUri !== "" && imageUri !== user.imageUrl) {
+      const response = await fetch(imageUri);
+      const blob = await response.blob();
+      const storageRef = ref(getStorage(), `images/users/${user.uid}`);
+      
+      await uploadBytes(storageRef, blob);
+
+      console.log("Изображение добавлено");
+
+      imageUrl = await getDownloadURL(storageRef);
     }
 
-    await updateUser(auth.currentUser.uid, name, imageUrl ? imageUrl : user.imageUrl)
-    ToastAndroid.show('Успешно', ToastAndroid.SHORT);
-    setIsDisabled(false)
-    navigation.goBack()
+    await updateUser(auth.currentUser.uid, name, imageUrl);
+
+    ToastAndroid.show("Успешно", ToastAndroid.SHORT);
+    setIsDisabled(false);
+    navigation.goBack();
   }
 
   const clear = () => {
@@ -72,8 +73,8 @@ const EditProfileScreen = ({ route, navigation }) => {
         quality: 1,
       }
     );
-    if (!result.cancelled) {
-      setImageUri(result.uri);
+    if (!result.cancelled && result.assets?.length) {
+      setImageUri(result.assets[0].uri);
     }
   };
 

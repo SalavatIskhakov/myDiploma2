@@ -1,24 +1,21 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
+import { getDocs, onSnapshot } from "firebase/firestore";
 import React, { useEffect, useState } from 'react';
 import {
   FlatList,
   Image,
-  SafeAreaView,
   StatusBar,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
 } from 'react-native';
-import { getQuestionsByQuizId, getQuizById } from '../utils/database';
-
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { COLORS } from '../constants/theme';
+import { addQuizForUser, getDataByUid, getQuestionsByQuizId, getQuizById, updateXp } from '../utils/database';
+import { auth } from '../utils/firebase';
 import FormButton from './components/FormButton';
 import ResultModal from './components/ResultModal';
-
-import { addQuizForUser, getDataByUid, updateXp } from '../utils/database';
-import { auth } from '../utils/firebase';
-
-import { COLORS } from '../constants/theme';
 
 const PlayQuizScreen = ({ navigation, route }) => {
   const [currentQuizId, setCurrentQuizId] = useState(route.params.quizId);
@@ -43,31 +40,33 @@ const PlayQuizScreen = ({ navigation, route }) => {
 
   const getQuizAndQuestionDetails = async () => {
     // Get Quiz
-    let currentQuiz = await getQuizById(currentQuizId);
-    currentQuiz = currentQuiz.data();
-    setTitle(currentQuiz.title);
+     const quizSnap = await getQuizById(currentQuizId);
 
-    // Get Questions for current quiz
-    const questions = await getQuestionsByQuizId(currentQuizId);
+    if (quizSnap.exists()) {
+      const quizData = quizSnap.data();
+      setTitle(quizData.title);
+    }
 
-    questions.onSnapshot(async docs => {
-      console.log('change PlayQuizScreen')
-      const questionsDocs = docs.docs;
-      let tempQuestions = [];
+    // ===== Подписываемся на вопросы =====
+    const questionsQuery = getQuestionsByQuizId(currentQuizId);
 
-      await questionsDocs.forEach(async res => {
-        let question = res.data();
-  
-        // Create Single array of all options and shuffle it
+    onSnapshot(questionsQuery, (snapshot) => {
+      console.log("change PlayQuizScreen");
+
+      const tempQuestions = snapshot.docs.map((docSnap) => {
+        const question = docSnap.data();
+
+        // options
         question.allOptions = shuffleArray([
           ...question.incorrect_answers,
           question.correct_answer,
         ]);
-        await tempQuestions.push(question);
+
+        return question;
       });
-  
-      setQuestions([...tempQuestions]);
-    })
+
+      setQuestions(tempQuestions);
+    });
   };
 
   const pushDataInDb = async () => {
@@ -79,16 +78,16 @@ const PlayQuizScreen = ({ navigation, route }) => {
     updateUserXp()
   };
 
-  const updateUserXp = async () => {
-    const quizzes = await getDataByUid(auth.currentUser?.uid).get();
-    let xp = 0;
+  const updateUserXp = async () => {      
+  const quizzesSnap = await getDocs(getDataByUid(auth.currentUser?.uid));
+  let xp = 0;
 
-    await quizzes.docs.forEach(async res => {
-      let currentQuiz = res.data();
-      xp += currentQuiz.correctCount;
-    });
+  quizzesSnap.docs.forEach(docSnap => {
+    const currentQuiz = docSnap.data();
+    xp += currentQuiz.correctCount;
+  });
 
-    await updateXp(auth.currentUser?.uid, xp)
+  await updateXp(auth.currentUser?.uid, xp);
   }
 
   useEffect(() => {

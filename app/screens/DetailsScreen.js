@@ -7,6 +7,7 @@ import {
   Text,
   View,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { getDataByUid, getUsers } from '../utils/database';
 import { auth } from '../utils/firebase';
 
@@ -77,8 +78,8 @@ const DetailsScreen = () => {
     getAllUsers();
   }, []);
   return (
-    <ScrollView>
-      <View style={styles.container}>
+    <ScrollView style={styles.container}>
+      <SafeAreaView style={{ flex:1 }}>
         {/* Statistics */}
         <Text style={styles.text}>Статистика</Text>
         <View style={styles.statistics}>
@@ -133,7 +134,7 @@ const DetailsScreen = () => {
             )
           })
         }
-      </View>
+      </SafeAreaView>
     </ScrollView>
   );
 }

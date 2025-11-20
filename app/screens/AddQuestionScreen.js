@@ -1,4 +1,5 @@
 import { launchImageLibraryAsync, MediaTypeOptions } from 'expo-image-picker';
+import { getDownloadURL, getStorage, ref, uploadBytes } from "firebase/storage";
 import React, { useState } from 'react';
 import {
   Image,
@@ -15,7 +16,6 @@ import FormButton from './components/FormButton';
 import FormInput from './components/FormInput';
 
 import { createQuestion } from '../utils/database';
-import { storage } from '../utils/firebase';
 
 import { COLORS } from '../constants/theme';
 
@@ -36,6 +36,8 @@ const AddQuestionScreen = ({ navigation, route }) => {
   const [optionTwo, setOptionTwo] = useState('');
   const [optionThree, setOptionThree] = useState('');
   const [optionFour, setOptionFour] = useState('');
+
+  const storage = getStorage();
 
   const isNum = (val) => (/^(0|[1-9]\d*)(\.[0-9]*)?$/.test(val))
 
@@ -62,17 +64,18 @@ const AddQuestionScreen = ({ navigation, route }) => {
     // Upload Image
     let imageUrl = '';
 
-    if (imageUri != '') {
-      const responce = await fetch(imageUri);
-      const blob = await responce.blob();
-
-      const reference = storage.ref().child(
-        `/images/questions/${currentQuizId}_${currentQuestionId}`,
+    if (imageUri !== "") {
+      const response = await fetch(imageUri);
+      const blob = await response.blob();
+      const imageRef = ref(
+        storage,
+        `images/questions/${currentQuizId}_${currentQuestionId}`
       );
-      await reference.put(blob).then(() => {
-        console.log('Изображение добавлено');
-      })
-      imageUrl = await reference.getDownloadURL();
+
+      await uploadBytes(imageRef, blob);
+      console.log("Изображение добавлено");
+
+      imageUrl = await getDownloadURL(imageRef);
     }
 
     // Add question to db
@@ -110,8 +113,8 @@ const AddQuestionScreen = ({ navigation, route }) => {
         quality: 1,
       }
     );
-    if (!result.cancelled) {
-      setImageUri(result.uri);
+    if (!result.cancelled && result.assets?.length) {
+      setImageUri(result.assets[0].uri);
     }
   };
 
