@@ -35,7 +35,7 @@ const Img = ({ point, user, quizId }) => {
         }
 
       </View>
-      <Text style={{ fontSize: 22 }}>{point.title}</Text>
+      <Text style={{ fontSize: 22, textAlign: 'center' }}>{point.title}</Text>
     </>
   )
 };
