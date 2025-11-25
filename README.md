@@ -6,7 +6,7 @@ Mobile application on React Native for conducting sightseeing quests
 
 1. Install [NodeJS](https://nodejs.org/en/download)
 
-2. Install dependencies
+2. Clone this project
 
    ```bash
    git clone https://github.com/SalavatIskhakov/myDiploma2.git
