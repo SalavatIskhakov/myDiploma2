@@ -5,6 +5,7 @@ import {
   ScrollView,
   StyleSheet,
   Text,
+  TouchableOpacity,
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -24,7 +25,7 @@ const Table = ({ text, value }) => (
   </View>
 )
 
-const DetailsScreen = () => {
+const DetailsScreen = ({ navigation }) => {
   const [allUsers, setAllUsers] = useState([]);
   const [quizCount, setQuizCount] = useState(0);
   const [correctCount, setCorrectCount] = useState(0);
@@ -110,7 +111,10 @@ const DetailsScreen = () => {
             }
 
             return (
-              <View key={user.uid}>
+              <TouchableOpacity
+                key={user.uid}
+                onPress={() => navigation.navigate('UserScreen', user)}
+              >
                 <View style={[
                   backgroundColor = { backgroundColor },
                   styles.item,
@@ -130,7 +134,7 @@ const DetailsScreen = () => {
                     <Text style={{ fontSize: 20, color: COLORS.primary }}>{user.xp} очков</Text>
                   </View>
                 </View>
-              </View>
+              </TouchableOpacity>
             )
           })
         }

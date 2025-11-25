@@ -1,21 +1,21 @@
-import { NavigationContainer } from '@react-navigation/native';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { createStackNavigator } from '@react-navigation/stack';
-import React from 'react';
-import { LogBox } from 'react-native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack'
+import { createStackNavigator } from '@react-navigation/stack'
+import React from 'react'
+import { LogBox } from 'react-native'
+import { COLORS } from './constants/theme'
+import AddQuestionScreen from './screens/AddQuestionScreen'
+import ChangeEmailScreen from './screens/ChangeEmailScreen'
+import ChangePasswordScreen from './screens/ChangePasswordScreen'
+import EditProfileScreen from './screens/EditProfileScreen'
+import ImgScreen from './screens/ImgScreen'
+import LoginScreen from './screens/LoginScreen'
+import MainContainer from './screens/MainContainer'
+import PlayQuizScreen from './screens/PlayQuizScreen'
+import QuizScreen from './screens/QuizScreen'
+import RegistrationScreen from './screens/RegistrationScreen'
+import UserScreen from './screens/UserScreen'
 
-import AddQuestionScreen from './screens/AddQuestionScreen';
-import ChangeEmailScreen from './screens/ChangeEmailScreen';
-import ChangePasswordScreen from './screens/ChangePasswordScreen';
-import EditProfileScreen from './screens/EditProfileScreen';
-import ImgScreen from './screens/ImgScreen';
-import LoginScreen from './screens/LoginScreen';
-import MainContainer from './screens/MainContainer';
-import PlayQuizScreen from './screens/PlayQuizScreen';
-import QuizScreen from './screens/QuizScreen';
-import RegistrationScreen from './screens/RegistrationScreen';
 
-import { COLORS } from './constants/theme';
 
 const NativeStack = createNativeStackNavigator();
 const Stack = createStackNavigator();
@@ -32,6 +32,7 @@ export default function App() {
         <Stack.Screen options={styles.quiz} name="Registration" component={RegistrationScreen} />
         <NativeStack.Screen options={{ headerShown: false }} name="Main" component={MainContainer} />
         <Stack.Screen options={styles.quiz} name="ImgScreen" component={ImgScreen} />
+        <Stack.Screen options={styles.quiz} name="UserScreen" component={UserScreen} />
         <Stack.Screen options={styles.quiz} name="QuizScreen" component={QuizScreen} />
         <Stack.Screen options={{ headerShown: false }} name="AddQuestionScreen" component={AddQuestionScreen} />
         <Stack.Screen options={{ headerShown: false }} name="PlayQuizScreen" component={PlayQuizScreen} />
