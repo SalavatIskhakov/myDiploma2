@@ -6,19 +6,21 @@ import {
   StyleSheet,
   Text,
   TouchableOpacity,
-  View
+  View,
+  ToastAndroid,
 } from 'react-native';
 
 import FormButton from './components/FormButton';
 import Img from './components/Img';
 
-import { getQuestionsByQuizId } from '../utils/database';
+import { addParticipant, deleteParticipant, getQuestionsByQuizId } from '../utils/database';
 
 import { COLORS, IMAGES, SIZES } from '../constants/theme';
 
 const QuizScreen = ({ navigation, route }) => {
-  const { title, id, description, imageUrl, user } = route.params;
+  const { title, id, description, imageUrl, user, participants } = route.params;
   const [points, setPoints] = useState([]);
+  const [isParticipating, setIsParticipating] = useState(!!participants?.includes(user.uid));
 
   const getQuizDetails = async () => {
     const pointsRef = getQuestionsByQuizId(id);  // collection(db, "Quizzes", id, "QNA")
@@ -102,7 +104,40 @@ const QuizScreen = ({ navigation, route }) => {
               }}
             />
           </View>
-        ): null}
+        ) : null}
+        {user.role === 'user' ?
+          isParticipating
+            ? (
+              <View style={{ alignItems: 'center' }}>
+                <FormButton
+                  labelText='Отписаться от квеста'
+                  style={[styles.btn, { width: '65%' }]}
+                  handleOnPress={async () => {
+                    await deleteParticipant(id, user.uid);
+                    setIsParticipating(false);
+                    ToastAndroid.show('Вы отписались от квеста', ToastAndroid.SHORT);
+                  }}
+                />
+              </View>
+            ) : (
+              <View style={{ alignItems: 'center' }}>
+                <FormButton
+                  labelText='Записаться на квест'
+                  style={[styles.btn, { width: '65%' }]}
+                  handleOnPress={async () => {
+                    await addParticipant(id, user.uid);
+                    setIsParticipating(true);
+                    ToastAndroid.show('Вы записались на квест', ToastAndroid.SHORT);
+                  }}
+                />
+              </View>
+            )
+          : participants?.length ? (
+            <Text style={{ fontSize: 20 }}>
+              Количество участников: {participants.length}
+            </Text>
+          ) : null
+        }
       </View>
     </ScrollView>
   )

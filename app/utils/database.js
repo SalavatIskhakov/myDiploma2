@@ -1,12 +1,14 @@
 import {
-  getFirestore,
   collection,
+  deleteDoc,
   doc,
-  setDoc,
-  updateDoc,
   getDoc,
   getDocs,
-  deleteDoc
+  getFirestore,
+  setDoc,
+  updateDoc,
+  arrayUnion,
+  arrayRemove,
 } from "firebase/firestore";
 
 import { app } from "./firebase";
@@ -69,11 +71,24 @@ export const createQuiz = (currentQuizId, title, description, imageUrl) => {
     title,
     description,
     imageUrl,
+    participants: [],
   });
 };
 
 export const deleteQuiz = (currentQuizId) => {
   return deleteDoc(doc(db, "Quizzes", currentQuizId));
+};
+
+export const addParticipant = (currentQuizId, userId) => {
+  return updateDoc(doc(db, "Quizzes", currentQuizId), {
+    participants: arrayUnion(userId)
+  })
+};
+
+export const deleteParticipant = (currentQuizId, userId) => {
+  return updateDoc(doc(db, "Quizzes", currentQuizId), {
+    participants: arrayRemove(userId)
+  })
 };
 
 // Create question

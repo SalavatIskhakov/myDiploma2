@@ -33,14 +33,14 @@ const HomeScreen = () => {
   const [refreshing, setRefreshing] = useState(false);
 
   const getUserInfo = async () => {
-  const userRef = getUserById(auth.currentUser?.uid); // это doc(db, "Users", uid)
+    const userRef = getUserById(auth.currentUser?.uid); // это doc(db, "Users", uid)
 
-  // подписка на realtime
-  return onSnapshot(userRef, (snapshot) => {
-    if (snapshot.exists()) {
-      setUser(snapshot.data());
-    }
-  });
+    // подписка на realtime
+    return onSnapshot(userRef, (snapshot) => {
+      if (snapshot.exists()) {
+        setUser(snapshot.data());
+      }
+    });
   }
 
   const getAllQuizzes = async () => {
