@@ -62,22 +62,39 @@ const DetailsScreen = ({ navigation }) => {
     const usersRef = getUsers();
     
     onSnapshot(usersRef, (docs) => {
-    console.log("change TOP10");
+      console.log("change TOP10");
 
-    const tempUsers = docs.docs.map((user) => user.data());
+      const tempUsers = docs.docs.map((user) => user.data());
 
-    setAllUsers(
-      tempUsers
-        .filter((user) => user?.role !== "admin")
-        .sort((a, b) => Number(b.xp) - Number(a.xp))
-    );
-  });
+      setAllUsers(
+        tempUsers
+          .filter((user) => user?.role !== "admin")
+          .sort((a, b) => Number(b.xp) - Number(a.xp))
+      );
+    });
   }
+
+  const getPointsWord = (count) => {
+    const mod100 = count % 100;
+    const mod10 = count % 10;
+
+    if (mod100 >= 11 && mod100 <= 14) {
+      return "очков";
+    }
+    if (mod10 === 1) {
+      return "очко";
+    }
+    if (mod10 >= 2 && mod10 <= 4) {
+      return "очка";
+    }
+    return "очков";
+  };
 
   useEffect(() => {
     getAllDataOfUid();
     getAllUsers();
   }, []);
+  
   return (
     <ScrollView style={styles.container}>
       <SafeAreaView style={{ flex:1 }}>
@@ -131,7 +148,7 @@ const DetailsScreen = ({ navigation }) => {
                     </Text>
                   </View>
                   <View>
-                    <Text style={{ fontSize: 20, color: COLORS.primary }}>{user.xp} очков</Text>
+                    <Text style={{ fontSize: 20, color: COLORS.primary }}>{user.xp} {getPointsWord(user.xp)}</Text>
                   </View>
                 </View>
               </TouchableOpacity>
